@@ -1,0 +1,11 @@
+{
+  "name": "play-oauth-server",
+  "version": "1.0.0",
+  "description": "AOauth server for nteract-play",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "nteract contributors",
+  "license": "ISC"
+}

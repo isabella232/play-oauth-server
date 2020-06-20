@@ -1,0 +1,20 @@
+{
+  "name": "play-oauth-server",
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@now/node-server"
+    }
+  ],
+  "env": {
+    "GITHUB_SECRET": "@github_client_secret",
+    "GITHUB_CLIENT": "@github_client_id"
+  },
+  "routes": [
+    {
+      "src": "/github",
+      "dest": "index.js"
+    }
+  ]
+}
