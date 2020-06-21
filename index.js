@@ -7,11 +7,11 @@ const GITHUB_SECRET = process.env.GITHUB_SECRET
 
 function httpsRequest(params) {
   return new Promise( (resolve, reject) => {
-        https.get(params, (res) => {
-
+       var req = https.get(params, (res) => {
            if (res.statusCode < 200 || res.statusCode >= 300) {
-              return reject(new Error('statusCode=' + res.statusCode));
-           }
+              console.log(res.url)
+              return reject(new Error( res.statusCode));
+           } 
 
            let data = ""
            res.on('data', (chunk) => {
@@ -23,11 +23,22 @@ function httpsRequest(params) {
                 resolve(data)
            });
      })
+    req.on('error', function(err) {
+      reject(err)
+    })
+    req.end()
   });
 }
 
 
 http.createServer( (req, res) => {
+
+  const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+        'Access-Control-Max-Age': 2592000, // 30 days
+        'Content-Type': 'application/json;charset=utf-8'
+      };
 
   if (req.url.match(/github/) ){
     const urlQuery =  url.parse(req.url, true).query
@@ -43,18 +54,24 @@ http.createServer( (req, res) => {
       }
 
        httpsRequest(options).then( async  (data) => {   
-        res.setHeader('Content-Type', 'application/json;charset=utf-8');
+        console.log("data sent")
+        console.log(data)
+        res.writeHead(200, headers)
         await res.end(data)
-      })
-      
+       }).catch( (error) => {
+          console.log(error)
+          res.writeHead(404, headers)
+          res.end(`{"error": "Request to github server failed"}`)
+       })
+
     }else{
-       res.setHeader('Content-Type', 'application/json;charset=utf-8');
-       res.end(`{"error": "${http.STATUS_CODES[404]}"}`)
+        res.writeHead(405, headers)
+       res.end(`{"error": "${http.STATUS_CODES[405]}"}`)
     }
   }else {
   // End all the other connections
-  res.setHeader('Content-Type', 'application/json;charset=utf-8');
-  res.end(`{"error": "${http.STATUS_CODES[404]}"}`)
+  res.writeHead(405, headers)
+  res.end(`{"error": "${http.STATUS_CODES[405]}"}`)
   }
 }).listen(port, () => {
   console.log(`Server Listening on port: ${port}`);
